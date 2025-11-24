@@ -139,6 +139,72 @@ describe('TemplateParser', () => {
     });
   });
 
+  describe('Or Expressions', () => {
+    it('should parse simple or fallback', () => {
+      const parser = new TemplateParser('{{ category_meta_title or category }}');
+      const ast = parser.parse();
+
+      expect(ast).toStrictEqual([{
+        type: 'TEMPLATE',
+        expression: {
+          type: 'OR',
+          left: { type: 'VARIABLE', name: 'category_meta_title' },
+          right: { type: 'VARIABLE', name: 'category' },
+        },
+      }]);
+    });
+
+    it('should parse or with string fallback', () => {
+      const parser = new TemplateParser('{{ name or \'default\' }}');
+      const ast = parser.parse();
+
+      expect(ast).toStrictEqual([{
+        type: 'TEMPLATE',
+        expression: {
+          type: 'OR',
+          left: { type: 'VARIABLE', name: 'name' },
+          right: { type: 'STRING', value: 'default' },
+        },
+      }]);
+    });
+
+    it('should parse chained or expressions', () => {
+      const parser = new TemplateParser('{{ a or b or c }}');
+      const ast = parser.parse();
+
+      expect(ast).toStrictEqual([{
+        type: 'TEMPLATE',
+        expression: {
+          type: 'OR',
+          left: {
+            type: 'OR',
+            left: { type: 'VARIABLE', name: 'a' },
+            right: { type: 'VARIABLE', name: 'b' },
+          },
+          right: { type: 'VARIABLE', name: 'c' },
+        },
+      }]);
+    });
+
+    it('should parse or with filters', () => {
+      const parser = new TemplateParser('{{ name | lower or \'default\' }}');
+      const ast = parser.parse();
+
+      expect(ast).toStrictEqual([{
+        type: 'TEMPLATE',
+        expression: {
+          type: 'OR',
+          left: {
+            type: 'PIPE',
+            left: { type: 'VARIABLE', name: 'name' },
+            filter: { type: 'FILTER', name: 'lower', args: [] },
+          },
+          right: { type: 'STRING', value: 'default' },
+        },
+      }]);
+    });
+  });
+
   describe('Error Handling', () => {
     it('should throw error for unclosed template', () => {
       expect(() => {
