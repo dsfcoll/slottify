@@ -158,25 +158,34 @@ describe('TemplateEngine', () => {
       expect(result2).toBe('DEFAULT');
     });
 
+    it('should work with filters on right', () => {
+      const r1 = engine.render('{{ name or \'Default\' | upper }}', {});
+
+      expect(r1).toBe('DEFAULT');
+
+      const r2 = engine.render('{{ name or other | upper }}', { other: 'other' });
+      expect(r2).toBe('OTHER');
+    });
+
     it('should handle the original use case from the issue', () => {
-      const template = '{{ category_meta_title or category }} - MaturePorn.com';
+      const template = '{{ category_meta_title or category }} - example.com';
 
       const result1 = engine.render(template, {
         category_meta_title: 'Custom Meta Title',
         category: 'Videos',
       });
-      expect(result1).toBe('Custom Meta Title - MaturePorn.com');
+      expect(result1).toBe('Custom Meta Title - example.com');
 
       const result2 = engine.render(template, {
         category_meta_title: '',
         category: 'Videos',
       });
-      expect(result2).toBe('Videos - MaturePorn.com');
+      expect(result2).toBe('Videos - example.com');
 
       const result3 = engine.render(template, {
         category: 'Videos',
       });
-      expect(result3).toBe('Videos - MaturePorn.com');
+      expect(result3).toBe('Videos - example.com');
     });
   });
 
