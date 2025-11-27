@@ -95,7 +95,12 @@ class TemplateParser {
             identifier += this.input[i];
             i++;
           }
-          tokens.push({ type: 'IDENTIFIER', value: identifier });
+          // Check if it's the 'or' keyword
+          if (identifier === 'or') {
+            tokens.push({ type: 'OR', value: identifier });
+          } else {
+            tokens.push({ type: 'IDENTIFIER', value: identifier });
+          }
           continue;
         }
 
@@ -191,7 +196,7 @@ class TemplateParser {
   }
 
   private parseTernary(): ExpressionNode {
-    const left = this.parsePipeline();
+    const left = this.parseOr();
 
     if (this.match('QUESTION')) {
       const trueExpr = this.parseExpression();
@@ -203,6 +208,21 @@ class TemplateParser {
         condition: left,
         trueExpr,
         falseExpr,
+      };
+    }
+
+    return left;
+  }
+
+  private parseOr(): ExpressionNode {
+    let left = this.parsePipeline();
+
+    while (this.match('OR')) {
+      const right = this.parsePipeline();
+      left = {
+        type: 'OR',
+        left,
+        right,
       };
     }
 
@@ -233,6 +253,7 @@ class TemplateParser {
       && this.peek()!.type !== 'PIPE'
       && this.peek()!.type !== 'QUESTION'
       && this.peek()!.type !== 'COLON'
+      && this.peek()!.type !== 'OR'
       && this.peek()!.type !== 'CLOSE_TEMPLATE') {
       args.push(this.parsePrimary());
     }

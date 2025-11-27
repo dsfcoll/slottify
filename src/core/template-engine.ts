@@ -68,6 +68,10 @@ class TemplateEngine {
           ? this.evaluateExpression(expr.trueExpr, context)
           : this.evaluateExpression(expr.falseExpr, context);
       }
+      case 'OR': {
+        const left = this.evaluateExpression(expr.left, context);
+        return left || this.evaluateExpression(expr.right, context);
+      }
 
       default:
         return '';

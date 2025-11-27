@@ -4,6 +4,7 @@ export type TokenType
     | 'PIPE'
     | 'QUESTION'
     | 'COLON'
+    | 'OR'
     | 'STRING'
     | 'IDENTIFIER'
     | 'TEXT';

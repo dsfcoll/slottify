@@ -32,10 +32,16 @@ export interface TernaryNode {
   falseExpr: ExpressionNode;
 }
 
+export interface OrNode {
+  type: 'OR';
+  left: ExpressionNode;
+  right: ExpressionNode;
+}
+
 export interface TemplateNode<T = ExpressionNode> {
   type: 'TEMPLATE';
   expression: ExpressionNode<T>;
 }
 
-export type ExpressionNode<T = VariableNode | StringNode | PipeNode | TernaryNode> = T;
+export type ExpressionNode<T = VariableNode | StringNode | PipeNode | TernaryNode | OrNode> = T;
 export type ASTNode<T = ExpressionNode> = TextNode | TemplateNode<T>;

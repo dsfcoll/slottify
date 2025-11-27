@@ -110,6 +110,85 @@ describe('TemplateEngine', () => {
     });
   });
 
+  describe('Or Fallback Syntax', () => {
+    it('should use first value when it exists', () => {
+      const result = engine.render('{{ category_meta_title or category }}', {
+        category_meta_title: 'Meta Title',
+        category: 'Category',
+      });
+      expect(result).toBe('Meta Title');
+    });
+
+    it('should fallback to second value when first is empty', () => {
+      const result = engine.render('{{ category_meta_title or category }}', {
+        category_meta_title: '',
+        category: 'Category',
+      });
+      expect(result).toBe('Category');
+    });
+
+    it('should fallback when first value is missing', () => {
+      const result = engine.render('{{ category_meta_title or category }}', {
+        category: 'Category',
+      });
+      expect(result).toBe('Category');
+    });
+
+    it('should work with string literals', () => {
+      const result = engine.render('{{ name or \'Default Name\' }}', {});
+      expect(result).toBe('Default Name');
+    });
+
+    it('should handle chained or expressions', () => {
+      const result1 = engine.render('{{ a or b or c }}', { a: 'First' });
+      expect(result1).toBe('First');
+
+      const result2 = engine.render('{{ a or b or c }}', { b: 'Second' });
+      expect(result2).toBe('Second');
+
+      const result3 = engine.render('{{ a or b or c }}', { c: 'Third' });
+      expect(result3).toBe('Third');
+    });
+
+    it('should work with filters', () => {
+      const result = engine.render('{{ name | upper or \'DEFAULT\' }}', { name: 'john' });
+      expect(result).toBe('JOHN');
+
+      const result2 = engine.render('{{ name | upper or \'DEFAULT\' }}', { name: '' });
+      expect(result2).toBe('DEFAULT');
+    });
+
+    it('should work with filters on right', () => {
+      const r1 = engine.render('{{ name or \'Default\' | upper }}', {});
+
+      expect(r1).toBe('DEFAULT');
+
+      const r2 = engine.render('{{ name or other | upper }}', { other: 'other' });
+      expect(r2).toBe('OTHER');
+    });
+
+    it('should handle the original use case from the issue', () => {
+      const template = '{{ category_meta_title or category }} - example.com';
+
+      const result1 = engine.render(template, {
+        category_meta_title: 'Custom Meta Title',
+        category: 'Videos',
+      });
+      expect(result1).toBe('Custom Meta Title - example.com');
+
+      const result2 = engine.render(template, {
+        category_meta_title: '',
+        category: 'Videos',
+      });
+      expect(result2).toBe('Videos - example.com');
+
+      const result3 = engine.render(template, {
+        category: 'Videos',
+      });
+      expect(result3).toBe('Videos - example.com');
+    });
+  });
+
   describe('Custom Filters', () => {
     it('should add custom filter', () => {
       engine.addFilter('capitalize', (value: any) => {
